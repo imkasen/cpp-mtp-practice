@@ -3,7 +3,7 @@
 #include <chrono>
 #include <cstdio>
 
-std::vector<int> pal {
+std::vector<int> pal { /* NOLINT */
     0xb2000a,0xb20009,0xb2000a,0xb1000a,0xb1000b,0xaf000d,0xaf000e,0xae000f,0xad0011,0xac0012,0xab0013,0xaa0015,
     0xa90016,0xa80018,0xa70019,0xa6001b,0xa4001d,0xa3001e,0xa2001f,0xa00022,0x9f0023,0x9e0025,0x9c0028,0x9b0029,
     0x9a002b,0x99002d,0x97002f,0x960031,0x940033,0x930035,0x910037,0x8f0039,0x8e003c,0x8d003d,0x8b0040,0x8a0042,
@@ -28,15 +28,17 @@ std::vector<int> pal {
     0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff
 };
 
-void mandelbrot(float width, float height, std::vector<unsigned int> &pixmap) {
+void mandelbrot(const float width,
+                const float height,
+                std::vector<unsigned int> &pixmap) {
     float xmin = -1.6f;
     float xmax = 1.6f;
     float ymin = -1.6f;
     float ymax = 1.6f;
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < width; ++j) {
-            float b = xmin + j * (xmax - xmin) / width;
-            float a = ymin + i * (ymax - ymin) / height;
+    for (int i = 0; static_cast<float>(i) < height; ++i) {
+        for (int j = 0; static_cast<float>(j) < width; ++j) {
+            float b = xmin + static_cast<float>(j) * (xmax - xmin) / width;
+            float a = ymin + static_cast<float>(i) * (ymax - ymin) / height;
             float sx = 0.0f;
             float sy = 0.0f;
             int ii = 0;
@@ -53,20 +55,19 @@ void mandelbrot(float width, float height, std::vector<unsigned int> &pixmap) {
             if (ii == 1500) {
                 pixmap.at(j + i * static_cast<int>(width)) = 0;
             } else {
-                int c = static_cast<int>((ii / 32.0f) * 256.0f);
+                int c = static_cast<int>((static_cast<float>(ii) / 32.0f) * 256.0f);
                 pixmap.at(j + i * static_cast<int>(width)) = pal.at(c % 256);
             }
         }
     }
 }
 
-void writetga(const std::vector<unsigned int> &pixmap,
-              unsigned int width,
-              unsigned int height,
+void write_tga(const std::vector<unsigned int> &pixmap,
+              const unsigned int width,
+              const unsigned int height,
               const std::string &name)
 {
     FILE *f;
-    int i, j;
     char buffer[50];
     f = fopen(name.c_str(), "wb");
     fwrite("\x00\x00\x02", sizeof(char), 3, f);
@@ -78,8 +79,8 @@ void writetga(const std::vector<unsigned int> &pixmap,
     sprintf(buffer, "%c%c", (height & 0x00ff) % 0xff, (height & 0xff00) % 0xff);
     fwrite(buffer, sizeof(char), 2, f);
     fwrite("\x18\x00", sizeof(char), 2, f);
-    for (i = height - 1; i >= 0; i--) {
-        for (j = 0; j < width; j++) {
+    for (int i = static_cast<int>(height) - 1; i >= 0; i--) {
+        for (int j = 0; j < width; j++) {
             sprintf(buffer, "%c%c%c",
                     (pixmap.at(j + i * width) >> 16) & 0x000000ff,
                     (pixmap.at(j + i * width) >> 8) & 0x000000ff,
@@ -91,12 +92,14 @@ void writetga(const std::vector<unsigned int> &pixmap,
 }
 
 int main(int argc, char* argv[]) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     // check if the arguments are passed. i.e. the size of the fractal.
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " fractal_size" << std::endl;
         exit(EXIT_FAILURE);
     }
-    unsigned int size = std::stoi(argv[1]);
+    const unsigned int size = std::stoi(argv[1]);
 
     // create an array of timers for each iteration
     std::vector<double> times(ITERATIONS);
@@ -114,14 +117,14 @@ int main(int argc, char* argv[]) {
         }
 
         // start the timer
-        auto start_time = std::chrono::high_resolution_clock::now();
+        auto start_func = std::chrono::high_resolution_clock::now();
 
         // run the mandelbrot function
         mandelbrot(static_cast<float>(size), static_cast<float>(size), pixmap);
 
         // end the timer
-        auto end_time = std::chrono::high_resolution_clock::now();
-        times.at(i) = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+        auto end_func = std::chrono::high_resolution_clock::now();
+        times.at(i) = std::chrono::duration<double, std::micro>(end_func - start_func).count();
 
         // free the memory, except for the last run
         if (i < ITERATIONS - 1) {
@@ -131,10 +134,15 @@ int main(int argc, char* argv[]) {
     }
 
     // write the fractal to a file
-    writetga(pixmap, size, size, filename);
+    write_tga(pixmap, size, size, filename);
 
     // print the results
     print_results(times);
+
+    std::cout << std::endl;
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto total_time = std::chrono::duration<double, std::micro>(end_time - start_time).count();
+    std::cout << "Total time: " << total_time / 1e6 << " (s)" << std::endl;
 
     return EXIT_SUCCESS;
 }
