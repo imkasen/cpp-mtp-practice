@@ -1,7 +1,6 @@
 #include "common.cc"
 #include <string>
 #include <chrono>
-#include <fstream>
 #include <cstdio>
 
 std::vector<int> pal {
@@ -90,31 +89,6 @@ void writetga(const std::vector<unsigned int> &pixmap,
     }
     fclose(f);
 }
-
-/*
-void writetga(const std::vector<unsigned int> &pixmap,
-              unsigned int width,
-              unsigned int height,
-              const std::string &name) {
-    std::ofstream file;
-    file.open(name, std::ios::out | std::ios::binary);
-    file << "\x00\x00\x02";
-    file << "\x00\x00\x00\x00\x00";
-    file << "\x00\x00";
-    file << "\x00\x00";
-    file << (width & 0x00ff) % 0xff << (width & 0xff00) % 0xff;
-    file << (height & 0x00ff) % 0xff << (height & 0xff00) % 0xff;
-    file << "\x18\x00";
-    for (int i = height - 1; i >= 0; --i) {
-        for (int j = 0; j < width; ++j) {
-            file << ((pixmap.at(j + i * width) >> 16) & 0x000000ff);
-            file << ((pixmap.at(j + i * width) >> 8) & 0x000000ff);
-            file << (pixmap.at(j + i * width) & 0x000000ff);
-        }
-    }
-    file.close();
-}
-*/
 
 int main(int argc, char* argv[]) {
     // check if the arguments are passed. i.e. the size of the fractal.

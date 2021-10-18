@@ -1,8 +1,7 @@
 CC  := g++
-STD := -std=c++17
 
 fractal_seq:
-	$(CC) fractal_seq.cc -o fractal_seq $(STD)
+	$(CC) fractal_seq.cc -o fractal_seq -std=c++11
 
 
 .PHONY: all clean
