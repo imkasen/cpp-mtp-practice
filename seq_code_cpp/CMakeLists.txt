@@ -9,3 +9,5 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 add_executable(fractal_seq fractal_seq.cc)
+
+add_executable(pcc_seq pcc_seq.cc)
