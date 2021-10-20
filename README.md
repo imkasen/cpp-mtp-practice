@@ -6,7 +6,7 @@ Use C++ to practice multi-threaded programming of Mandelbrot Fractal Calculation
 
 * Ubuntu 20.04 LTS
 * GCC 9.3.0
-* C99 / C++17
+* C99 / C++11
 
 # Mandelbrot fractal calculation
 
@@ -34,6 +34,11 @@ Use C++ to practice multi-threaded programming of Mandelbrot Fractal Calculation
    # or
    $ diff fracout_<size>.tga ../resources/ref/fracout_<size>.tga
    ```
+
+## Sequential Version in C++
+
+1. `cd seq_code_cpp`
+2. the rest are the same.
 
 # Pearson Correlation Coefficient (PCC)
 
@@ -68,6 +73,11 @@ Use C++ to practice multi-threaded programming of Mandelbrot Fractal Calculation
    # or
    $ diff pccout_<size>_<size>.dat ../resources/ref/pccout_<size>_<size>.dat
    ```
+
+## Sequential Version in C++
+
+1. `cd seq_code_cpp`
+2. the rest are the same.
 
 # LICENSE
 
