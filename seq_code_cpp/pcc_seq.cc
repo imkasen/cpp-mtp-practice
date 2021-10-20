@@ -4,6 +4,7 @@
 #include <sstream>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 
 // Read tab delimited matrix file
 void read_matrix(const std::string &input_filename,
@@ -74,6 +75,7 @@ void pearson(const std::vector<float> &minus_mean,
             sum1 += i;
         }
 
+        // *could use operator[] instead of at() to speed up
         for (int sample2 = sample1 + 1; sample2 < rows; ++sample2) {
             float sum2 = 0.0f;
             for (int j = 0; j < cols; ++j) {
@@ -101,17 +103,12 @@ void pearson_seq(const std::vector<float> &matrix,
 void write_output(const std::vector<float> &output,
                   const long long cor_size,
                   const std::string &output_filename) {
-    std::ofstream outfile;
-    outfile.open(output_filename, std::ios::out | std::ios::binary);
-    if (!outfile) {
-        std::cerr << "error: can not open " << output_filename << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    FILE *f;
+    f = fopen(output_filename.c_str(),"wb");
     for (int i = 0; i < cor_size; ++i) {
-        outfile.write(reinterpret_cast<const char*>(&output.at(i)), sizeof(float));
-        outfile.write("0x20", 1);
+        fprintf(f, "%f ", output.at(i));
     }
-    outfile.close();
+    fclose(f);
 }
 
 int main(int argc, char* argv[]) {
