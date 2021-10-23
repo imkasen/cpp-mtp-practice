@@ -9,5 +9,6 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 add_executable(fractal_par fractal_par.cc)
+target_link_libraries(fractal_par pthread)
 
 add_executable(pcc_par pcc_par.cc)

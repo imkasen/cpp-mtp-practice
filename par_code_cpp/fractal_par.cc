@@ -2,6 +2,8 @@
 #include <string>
 #include <chrono>
 #include <cstdio>
+#include <functional>
+#include <thread>
 
 std::vector<int> pal { /* NOLINT */
     0xb2000a,0xb20009,0xb2000a,0xb1000a,0xb1000b,0xaf000d,0xaf000e,0xae000f,0xad0011,0xac0012,0xab0013,0xaa0015,
@@ -28,20 +30,22 @@ std::vector<int> pal { /* NOLINT */
     0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff,0xfcff
 };
 
-void mandelbrot(const float width,
-                const float height,
+void mandelbrot(const unsigned int width,
+                const unsigned int height,
+                const unsigned int min_h,
+                const unsigned int max_h,
                 std::vector<unsigned int> &pixmap) {
     float xmin = -1.6f;
     float xmax = 1.6f;
     float ymin = -1.6f;
     float ymax = 1.6f;
-    for (int i = 0; static_cast<float>(i) < height; ++i) {
-        for (int j = 0; static_cast<float>(j) < width; ++j) {
-            float b = xmin + static_cast<float>(j) * (xmax - xmin) / width;
-            float a = ymin + static_cast<float>(i) * (ymax - ymin) / height;
+    for (unsigned int i = min_h; i < max_h; ++i) {
+        for (unsigned int j = 0; j < width; ++j) {
+            float b = xmin + static_cast<float>(j) * (xmax - xmin) / static_cast<float>(width);
+            float a = ymin + static_cast<float>(i) * (ymax - ymin) / static_cast<float>(height);
             float sx = 0.0f;
             float sy = 0.0f;
-            int ii = 0;
+            unsigned int ii = 0;
             while (sx + sy <= 64.0f) {
                 float xn = sx * sx - sy * sy + b;
                 float yn = 2 * sx * sy + a;
@@ -53,12 +57,35 @@ void mandelbrot(const float width,
                 }
             }
             if (ii == 1500) {
-                pixmap[j + i * static_cast<int>(width)] = 0;
+                pixmap[j + i * width] = 0;
             } else {
-                int c = static_cast<int>((static_cast<float>(ii) / 32.0f) * 256.0f);
-                pixmap[j + i * static_cast<int>(width)] = pal[c % 256];
+                unsigned int c = static_cast<int>((static_cast<float>(ii) / 32.0f) * 256.0f);
+                pixmap[j + i * width] = pal[c % 256];
             }
         }
+    }
+}
+
+void concurrent_mdb(const unsigned int width,
+                const unsigned int height,
+                std::vector<unsigned int> &pixmap) {
+    unsigned int concurrent_count = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+    unsigned int min = 0;
+    for (int i = 0; i < concurrent_count; ++i) {
+
+        unsigned int max = height / concurrent_count * (i + 1);
+        if (i == concurrent_count - 1 && max < height) {
+            max = height;
+        }
+
+        // no need to worry about data consistency
+        threads.emplace_back(mandelbrot, width, height, min, max, std::ref(pixmap));
+        min = max;
+    }
+
+    for (auto &thread : threads) {
+        thread.join();
     }
 }
 
@@ -120,7 +147,7 @@ int main(int argc, char* argv[]) {
         auto start_func = std::chrono::high_resolution_clock::now();
 
         // run the mandelbrot function
-        mandelbrot(static_cast<float>(size), static_cast<float>(size), pixmap);
+        concurrent_mdb(size, size, pixmap);
 
         // end the timer
         auto end_func = std::chrono::high_resolution_clock::now();

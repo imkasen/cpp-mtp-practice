@@ -1,7 +1,7 @@
 CC  := g++
 
 fractal_par:
-	$(CC) fractal_par.cc -o fractal_par -std=c++11
+	$(CC) fractal_par.cc -o fractal_par -std=c++11 -pthread
 
 pcc_par:
 	$(CC) pcc_par.cc -o pcc_par -std=c++11

@@ -1,5 +1,7 @@
-fractal_seq 
-pcc_seq 
+fractal_seq
+fractal_par
+pcc_seq
+pcc_par
 pcc_generate
 fracout_*.tga 
 pccout_*.dat
