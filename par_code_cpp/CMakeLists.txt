@@ -12,3 +12,4 @@ add_executable(fractal_par fractal_par.cc)
 target_link_libraries(fractal_par pthread)
 
 add_executable(pcc_par pcc_par.cc)
+target_link_libraries(pcc_par pthread)

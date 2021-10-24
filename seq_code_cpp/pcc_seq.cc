@@ -75,7 +75,6 @@ void pearson(const std::vector<float> &minus_mean,
             sum1 += i;
         }
 
-        // *could use operator[] instead of at() to speed up
         for (int sample2 = sample1 + 1; sample2 < rows; ++sample2) {
             float sum2 = 0.0f;
             for (int j = 0; j < cols; ++j) {

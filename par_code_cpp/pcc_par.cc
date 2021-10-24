@@ -5,6 +5,8 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <functional>
+#include <thread>
 
 // Read tab delimited matrix file
 void read_matrix(const std::string &input_filename,
@@ -68,15 +70,14 @@ void pearson(const std::vector<float> &minus_mean,
              const std::vector<float> &std_dev,
              std::vector<float> &output,
              const unsigned int rows,
+             const unsigned int min_rows,
+             const unsigned int max_rows,
              const unsigned int cols) {
-    for (int sample1 = 0; sample1 < rows - 1; ++sample1) {
-        int sum1 = 0;
-        for (int i = 0; i <= sample1 + 1; ++i) {
-            sum1 += i;
-        }
+    for (unsigned int sample1 = min_rows; sample1 < max_rows; ++sample1) {
+        unsigned int sum1 = 0;
+        sum1 = (sum1 + sample1 + 1) * (sample1 + 2) / 2;
 
-        // *could use operator[] instead of at() to speed up
-        for (int sample2 = sample1 + 1; sample2 < rows; ++sample2) {
+        for (unsigned int sample2 = sample1 + 1; sample2 < rows; ++sample2) {
             float sum2 = 0.0f;
             for (int j = 0; j < cols; ++j) {
                 sum2 += minus_mean[sample1 * cols + j] * minus_mean[sample2 * cols + j];
@@ -84,6 +85,31 @@ void pearson(const std::vector<float> &minus_mean,
             float r = sum2 / (std_dev[sample1] * std_dev[sample2]);
             output[sample1 * rows + sample2 - sum1] = r;
         }
+    }
+}
+
+void concurrent_pearson(const std::vector<float> &minus_mean,
+                        const std::vector<float> &std_dev,
+                        std::vector<float> &output,
+                        const unsigned int rows,
+                        const unsigned int cols) {
+    unsigned int concurrent_count = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+    unsigned int min = 0;
+    for (int i = 0; i < concurrent_count; ++i) {
+        unsigned int max = rows / concurrent_count * (i + 1);
+        if (i == concurrent_count - 1) {
+            max = rows - 1;
+        }
+
+        threads.emplace_back(pearson, std::cref(minus_mean),
+                             std::cref(std_dev), std::ref(output),
+                             rows, min, max, cols);
+        min = max;
+    }
+
+    for (auto &thread : threads) {
+        thread.join();
     }
 }
 
@@ -97,7 +123,7 @@ void pearson_seq(const std::vector<float> &matrix,
 
     calc_mean(matrix, mean, rows, cols);
     calc_mm_std(matrix, mean, minus_mean, std_dev, rows, cols);
-    pearson(minus_mean, std_dev, output, rows, cols);
+    concurrent_pearson(minus_mean, std_dev, output, rows, cols);
 }
 
 void write_output(const std::vector<float> &output,

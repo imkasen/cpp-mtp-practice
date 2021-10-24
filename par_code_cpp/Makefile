@@ -4,7 +4,7 @@ fractal_par:
 	$(CC) fractal_par.cc -o fractal_par -std=c++11 -pthread
 
 pcc_par:
-	$(CC) pcc_par.cc -o pcc_par -std=c++11
+	$(CC) pcc_par.cc -o pcc_par -std=c++11 -pthread
 
 #fractal_validate:
 #	diff fracout_1024.tga ../resources/ref/fracout_1024.tga

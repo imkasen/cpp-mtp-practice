@@ -75,7 +75,7 @@ void concurrent_mdb(const unsigned int width,
     for (int i = 0; i < concurrent_count; ++i) {
 
         unsigned int max = height / concurrent_count * (i + 1);
-        if (i == concurrent_count - 1 && max < height) {
+        if (i == concurrent_count - 1) {
             max = height;
         }
 
