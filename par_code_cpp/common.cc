@@ -14,7 +14,6 @@ void print_results(const std::vector<double> &times) {
     }
 
     std::cout << std::endl;
-    std::cout << std::endl;
 
     std::cout << "Avg. time: "
         << std::accumulate(times.cbegin(), times.cend(), 0.0) / static_cast<double>(times.size()) / 1e6 << " (s)"

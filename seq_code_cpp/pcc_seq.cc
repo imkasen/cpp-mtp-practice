@@ -156,9 +156,11 @@ int main(int argc, char* argv[]) {
         times[i] = std::chrono::duration<double, std::micro>(end_func - start_func).count();
     }
 
-    print_results(times);
-
     write_output(output, cor_size, output_filename);
+
+    std::cout << "pcc_seq - " << rows << " - " << cols << std::endl;
+
+    print_results(times);
 
     std::cout << std::endl;
     auto end_time = std::chrono::high_resolution_clock::now();
