@@ -1,10 +1,11 @@
 CC  := g++
+FLG := -std=c++11 -pthread -O3
 
 fractal_par:
-	$(CC) fractal_par.cc -o fractal_par -std=c++11 -pthread -Ofast
+	$(CC) fractal_par.cc -o fractal_par $(FLG)
 
 pcc_par:
-	$(CC) pcc_par.cc -o pcc_par -std=c++11 -pthread -Ofast
+	$(CC) pcc_par.cc -o pcc_par $(FLG)
 
 fractal_validate:
 	diff fracout_1024.tga ../resources/ref/fracout_1024.tga

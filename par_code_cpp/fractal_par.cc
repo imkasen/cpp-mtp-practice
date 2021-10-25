@@ -5,6 +5,9 @@
 #include <functional>
 #include <thread>
 
+// set thread numbers
+const unsigned int concurrent_count = std::thread::hardware_concurrency();
+
 std::vector<int> pal { /* NOLINT */
     0xb2000a,0xb20009,0xb2000a,0xb1000a,0xb1000b,0xaf000d,0xaf000e,0xae000f,0xad0011,0xac0012,0xab0013,0xaa0015,
     0xa90016,0xa80018,0xa70019,0xa6001b,0xa4001d,0xa3001e,0xa2001f,0xa00022,0x9f0023,0x9e0025,0x9c0028,0x9b0029,
@@ -69,17 +72,14 @@ void mandelbrot(const unsigned int width,
 void concurrent_mdb(const unsigned int width,
                 const unsigned int height,
                 std::vector<unsigned int> &pixmap) {
-    unsigned int concurrent_count = std::thread::hardware_concurrency();
     std::vector<std::thread> threads;
     unsigned int min = 0;
     for (int i = 0; i < concurrent_count; ++i) {
-
         unsigned int max = height / concurrent_count * (i + 1);
         if (i == concurrent_count - 1) {
             max = height;
         }
 
-        // no need to worry about data consistency
         threads.emplace_back(mandelbrot, width, height, min, max, std::ref(pixmap));
         min = max;
     }
@@ -163,7 +163,8 @@ int main(int argc, char* argv[]) {
     // write the fractal to a file
     write_tga(pixmap, size, size, filename);
 
-    std::cout << "fractal_par - " << size << std::endl;
+    std::cout << "fractal_par" << std::endl; 
+    std::cout << "size: " << size << ", threads: " << concurrent_count << std::endl;
 
     // print the results
     print_results(times);

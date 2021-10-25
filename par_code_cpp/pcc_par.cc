@@ -8,6 +8,9 @@
 #include <functional>
 #include <thread>
 
+// set thread numbers
+const unsigned int concurrent_count = std::thread::hardware_concurrency();
+
 // Read tab delimited matrix file
 void read_matrix(const std::string &input_filename,
                 std::vector<float> &matrix) {
@@ -93,7 +96,6 @@ void concurrent_pearson(const std::vector<float> &minus_mean,
                         std::vector<float> &output,
                         const unsigned int rows,
                         const unsigned int cols) {
-    unsigned int concurrent_count = std::thread::hardware_concurrency();
     std::vector<std::thread> threads;
     unsigned int min = 0;
     for (int i = 0; i < concurrent_count; ++i) {
@@ -113,7 +115,7 @@ void concurrent_pearson(const std::vector<float> &minus_mean,
     }
 }
 
-void pearson_seq(const std::vector<float> &matrix,
+void pearson_par(const std::vector<float> &matrix,
                  std::vector<float> &output,
                  const unsigned int rows,
                  const unsigned int cols) {
@@ -177,7 +179,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < ITERATIONS; ++i) {
         auto start_func = std::chrono::high_resolution_clock::now();
 
-        pearson_seq(matrix, output, rows, cols);
+        pearson_par(matrix, output, rows, cols);
 
         auto end_func = std::chrono::high_resolution_clock::now();
         times[i] = std::chrono::duration<double, std::micro>(end_func - start_func).count();
@@ -185,7 +187,9 @@ int main(int argc, char* argv[]) {
 
     write_output(output, cor_size, output_filename);
 
-    std::cout << "pcc_par - " << rows << " - " << cols << std::endl;
+    std::cout << "pcc_par" << std::endl;
+    std::cout << "size: " << rows << "*" << cols
+        << ", threads: " << concurrent_count << std::endl;
 
     print_results(times);
 

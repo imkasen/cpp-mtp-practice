@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
     // write the fractal to a file
     write_tga(pixmap, size, size, filename);
 
-    std::cout << "fractal_seq - " << size << std::endl;
+    std::cout << "fractal_seq, size: " << size << std::endl;
 
     // print the results
     print_results(times);

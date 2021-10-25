@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
 
     write_output(output, cor_size, output_filename);
 
-    std::cout << "pcc_seq - " << rows << " - " << cols << std::endl;
+    std::cout << "pcc_seq, size: " << rows << "*" << cols << std::endl;
 
     print_results(times);
 
